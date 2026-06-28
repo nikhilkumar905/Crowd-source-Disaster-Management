@@ -2,7 +2,7 @@
 
 NEXUS Response is a modern, real-time web application designed to coordinate disaster alert responses and resource allocation between Citizens, Volunteers, and Administrators. By leveraging real-time socket communication, interactive maps, and role-based workflows, the platform streamlines relief efforts during critical incidents.
 
-🚀 **Live Deployment Link:** [Insert Live Deployment Link Here]
+🚀 **Live Deployment Link:** [[ Live Deployment Link ](https://crowd-source-disaster-management.vercel.app/)]
 
 ---
 
