@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  server:
+    build: ./server
+    container_name: nexus_server
+    restart: always
+    network_mode: "host"
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb://127.0.0.1:27017/ldarcp
+      - JWT_SECRET=change_me_super_secret
+      - JWT_EXPIRES_IN=7d
+      - CLIENT_URL=http://localhost:5173
+    volumes:
+      - ./server/uploads:/app/uploads
+
+  client:
+    build: ./client
+    container_name: nexus_client
+    restart: always
+    network_mode: "host"
+    environment:
+      - VITE_API_URL=http://localhost:5001/api
+      - VITE_SOCKET_URL=http://localhost:5001
+    stdin_open: true
+    tty: true
