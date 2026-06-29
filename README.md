@@ -158,7 +158,7 @@ sudo docker compose exec server node seed-admin.js
 
 **Credentials Created:**
 - **Email:** `nikhilsah905@gmail.com`
-- **Password:** `nikhil@2857`
+- **Password:** `nikhil@6789`
 - **Role:** Admin
 
 ---

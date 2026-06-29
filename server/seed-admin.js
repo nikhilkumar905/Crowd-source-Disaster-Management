@@ -9,7 +9,7 @@ import { User } from './models/User.js';
 dotenv.config();
 
 const ADMIN_EMAIL    = 'nikhilsah905@gmail.com';
-const ADMIN_PASSWORD = 'nikhil@2857';
+const ADMIN_PASSWORD = 'nikhil@6789';
 const ADMIN_NAME     = 'Nikhil Sah';
 
 async function seed() {
