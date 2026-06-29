@@ -7,33 +7,54 @@ NEXUS Response is a modern, real-time web application designed to coordinate dis
 ---
 
 ## Table of Contents
-1. [Key Features](#key-features)
-2. [Tech Stack](#tech-stack)
-3. [Project Architecture](#project-architecture)
-4. [Getting Started (Local Development)](#getting-started-local-development)
-5. [Getting Started (Docker)](#getting-started-docker)
-6. [Seeding the Admin Account](#seeding-the-admin-account)
-7. [API Endpoints](#api-endpoints)
-8. [Real-time Events (WebSockets)](#real-time-events-websockets)
+1. [Key Features In-Depth](#key-features-in-depth)
+2. [Security Architecture & Features](#security-architecture--features)
+3. [Tech Stack](#tech-stack)
+4. [Project Architecture](#project-architecture)
+5. [Getting Started (Local Development for Windows)](#getting-started-local-development-for-windows)
+6. [Getting Started (Docker for Windows)](#getting-started-docker-for-windows)
+7. [Seeding the Admin Account](#seeding-the-admin-account)
+8. [API Endpoints Reference](#api-endpoints-reference)
+9. [Real-time Events (WebSockets)](#real-time-events-websockets)
 
 ---
 
-## Key Features
+## Key Features In-Depth
 
 ### 👤 Citizen Role
-- **Disaster Incident Reporting:** Create geolocated disaster reports with details and photos.
-- **Resource Requests:** Ask for vital aid like food, water, medical supplies, and shelter.
-- **Live Verification Cycle:** Approve and mark resource requests as resolved once received (eliminates false status updates).
+* **Disaster Incident Reporting:** Create geolocated disaster reports with categories, descriptions, severity, and photo uploads (via multipart/form-data upload support).
+* **Resource Requests:** Ask for vital aid like food, water, medical supplies, search & rescue, and shelter.
+* **Live Verification Cycle:** Approve and mark resource requests as resolved once received. Only the Citizen who created the request can close it, which eliminates fake status updates by malicious actors or mistakes by volunteers.
 
 ### 🤝 Volunteer Role
-- **Real-Time Map Alerts:** View local incidents and pending requests on an interactive map.
-- **Mission Check-ins:** Check in to aid locations within a 500m geofence radius.
-- **Availability Toggle:** Quickly update active status and skills list for assignment matchmaking.
+* **Interactive Live Map Alerts:** View local incidents and pending requests on a Leaflet-powered map.
+* **Geofenced Check-ins:** Check in to aid locations within a 500m geofence radius. The application uses client-side GPS coordinates to verify physical proximity before allowing status updates.
+* **Availability Toggle:** Quickly update active status and skills list for automated assignment matchmaking.
 
 ### 👑 Administrator Role
-- **Overview & Analytics:** Dynamic dashboard displaying status charts, active volunteer lists, and incident distributions.
-- **Broadcast System:** Send real-time priority alerts to all logged-in volunteers.
-- **Resource Management:** Assign tasks and monitor request-verification workflows.
+* **Overview & Analytics Dashboard:** Dynamic dashboard displaying real-time status charts, active volunteer lists, and incident distributions.
+* **Broadcast System:** Send real-time priority alerts to all active volunteer screens simultaneously via WebSockets.
+* **Resource Management:** Assign tasks and monitor request-verification workflows.
+
+---
+
+## Security Architecture & Features
+
+To ensure data integrity, user privacy, and server stability, the platform implements several layers of security:
+
+1. **Environment Variables Separation (.env)**
+   * Sensitive credentials (database passwords, private keys, API secrets) are kept out of source code.
+   * `.env` files are ignored in Git using `.gitignore` rules to prevent credentials leaks. A template file `.env.example` is provided to define required keys.
+2. **Password Hashing (bcrypt)**
+   * All passwords are encrypted using bcrypt hashing before being stored in the database.
+   * Secure comparisons are performed during login transactions without decrypting the passwords.
+3. **JSON Web Tokens (JWT) Session Protection**
+   * Sessions are stateless and secured using cryptographically signed JSON Web Tokens.
+   * Middleware validates client tokens on every request to protected routes.
+4. **Role-Based Access Control (RBAC)**
+   * Endpoint protection middleware ensures only users with the correct roles (`Admin`, `Volunteer`, `Citizen`) can access or mutate sensitive database entries.
+5. **CORS (Cross-Origin Resource Sharing) Configuration**
+   * Configured to only allow requests originating from verified client URLs. Unauthorized external origins are blocked.
 
 ---
 
@@ -47,13 +68,13 @@ NEXUS Response is a modern, real-time web application designed to coordinate dis
 | **Backend** | Node.js (Express) | Scalable REST API with custom routing middleware. |
 | **Database** | MongoDB (Mongoose) | Flexible NoSQL document models for users, tasks, and reports. |
 | **Real-time** | Socket.io | Bidirectional WebSocket communication for live notifications. |
-| **Container** | Docker & Docker Compose | Host-networking setup for instant platform orchestration. |
+| **Container** | Docker & Docker Compose | Containerized system with host-networking setups. |
 
 ---
 
 ## Project Architecture
 
-```
+```text
 Disaster Management/
 ├── client/                     # Frontend Application
 │   ├── src/
@@ -80,99 +101,138 @@ Disaster Management/
 
 ---
 
-## Getting Started (Local Development)
+## Getting Started (Local Development for Windows)
+
+Follow these step-by-step instructions to run the project locally on your Windows machine using Command Prompt (CMD) or PowerShell.
 
 ### Prerequisites
-- Node.js (v18+)
-- MongoDB (running on default port `27017`)
-
-### 1. Set Up the Server
-1. Navigate to the server folder:
-   ```bash
-   cd server
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure the environment variables (`.env`):
-   ```env
-   PORT=5001
-   MONGO_URI=mongodb://127.0.0.1:27017/ldarcp
-   JWT_SECRET=your_jwt_secret_key
-   JWT_EXPIRES_IN=7d
-   CLIENT_URL=http://localhost:5173
-   ```
-4. Start the backend:
-   ```bash
-   npm run dev
-   ```
-
-### 2. Set Up the Client
-1. Navigate to the client folder:
-   ```bash
-   cd ../client
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure client environment:
-   Make sure you have your backend connection endpoint matching the server API url (defaults to `http://localhost:5001`).
-4. Start the frontend:
-   ```bash
-   npm run dev
-   ```
-5. Open [http://localhost:5173](http://localhost:5173) in your browser.
+* **Node.js** (v18 or higher recommended). Download from [nodejs.org](https://nodejs.org/).
+* **MongoDB Community Server** (running locally on port `27017`) **OR** a **MongoDB Atlas Cloud Database**. Download from [mongodb.com](https://www.mongodb.com/try/download/community).
 
 ---
 
-## Getting Started (Docker)
+### Step 1: Set Up the Server
 
-To run the entire suite under containerization (useful for Linux hosts):
-
-1. Make sure your local MongoDB instance is running on port `27017`.
-2. Stop any local running servers on ports `5001` or `5173`.
-3. In the root directory, run:
-   ```bash
-   sudo docker compose up --build -d
+1. Open a Command Prompt or PowerShell window, and navigate to the project directory:
+   ```cmd
+   cd "C:\path\to\Disaster Management"
    ```
-4. Open the application at [http://localhost:5173](http://localhost:5173).
+2. Navigate to the `server` folder:
+   ```cmd
+   cd server
+   ```
+3. Install the dependencies:
+   ```cmd
+   npm install
+   ```
+4. Create your local configuration file from the example template:
+   ```cmd
+   copy .env.example .env
+   ```
+5. Open the newly created `server\.env` file in your editor (e.g., VS Code or Notepad) and update your configuration:
+   ```env
+   PORT=5001
+   MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<dbname>
+   JWT_SECRET=f4132f70e7dfb967a58b8ef9e8f387be84774f9d86826b6caae70d07d2e9380f866335836c0e1fdf704b8bd18ccf92b9a12a7cb2cb783a70c421ac371e336a84
+   JWT_EXPIRES_IN=7d
+   CLIENT_URL=http://localhost:5173
+   ```
+6. Start the backend server process:
+   ```cmd
+   npm run dev
+   ```
+   *You should see a message indicating the server is running on port 5001 and connected to the database successfully.*
+
+---
+
+### Step 2: Set Up the Client
+
+1. Open a **new, separate** Command Prompt or PowerShell window.
+2. Navigate to the `client` folder:
+   ```cmd
+   cd "C:\path\to\Disaster Management\client"
+   ```
+3. Install dependencies:
+   ```cmd
+   npm install
+   ```
+4. Start the frontend client dev server:
+   ```cmd
+   npm run dev
+   ```
+5. Open your browser and navigate to: **[http://localhost:5173](http://localhost:5173)**
+
+---
+
+## Getting Started (Docker for Windows)
+
+You can run the entire suite using Docker Desktop without installing Node.js or MongoDB locally.
+
+### Prerequisites
+* **Docker Desktop** installed and running on Windows. Download from [docker.com](https://www.docker.com/products/docker-desktop/).
+* Make sure your WSL 2 backend or Hyper-V is enabled and working in Docker settings.
+
+---
+
+### Step-by-Step Run:
+
+1. Open your Command Prompt or PowerShell window in the root directory:
+   ```cmd
+   cd "C:\path\to\Disaster Management"
+   ```
+2. Navigate to the `server` folder, copy the environment file, and edit it:
+   ```cmd
+   cd server
+   copy .env.example .env
+   cd ..
+   ```
+3. Ensure no local servers or databases are occupying ports `5001` or `5173`.
+4. Start the containers using Docker Compose:
+   ```cmd
+   docker compose up --build -d
+   ```
+   *(Note: No `sudo` is needed on Windows).*
+5. Open your web browser to access the client: **[http://localhost:5173](http://localhost:5173)**
 
 ---
 
 ## Seeding the Admin Account
 
-To log in as an administrator, you need to run the admin seed script. 
+To access the administrator features, you must populate the database with the default admin account.
 
-### Local Development:
-```bash
-cd server
-node seed-admin.js
-```
+### For Local Development:
+1. Open a command window in the `server` folder:
+   ```cmd
+   cd "C:\path\to\Disaster Management\server"
+   ```
+2. Execute the seeding script:
+   ```cmd
+   node seed-admin.js
+   ```
 
-### Docker Deployment:
-```bash
-sudo docker compose exec server node seed-admin.js
-```
+### For Docker Deployments:
+1. From the root directory, execute the script inside the running server container:
+   ```cmd
+   docker compose exec server node seed-admin.js
+   ```
 
-**Credentials Created:**
-- **Email:** `nikhilsah905@gmail.com`
-- **Password:** `nikhil@6789`
-- **Role:** Admin
+**Default Credentials Created:**
+* **Email:** `nikhilsah905@gmail.com`
+* **Password:** `nikhil@6789`
+* **Role:** Admin
 
 ---
 
-## API Endpoints
+## API Endpoints Reference
 
 ### Auth Routing (`/api/auth`)
 * `POST /register` — Register a new Citizen or Volunteer.
-* `POST /login` — Log in to existing account.
-* `GET /me` — Fetch currently authenticated session profile.
+* `POST /login` — Log in to an existing account.
+* `GET /me` — Fetch the currently authenticated session profile.
 
 ### Disaster Reports (`/api/disasters`)
 * `GET /` — Fetch all reports.
-* `POST /` — Create a report (supports image file uploads via `multer`).
+* `POST /` — Create an incident report (supports image file uploads via `multer`).
 
 ### Resource Requests (`/api/requests`)
 * `GET /` — Fetch active requests.
@@ -184,8 +244,8 @@ sudo docker compose exec server node seed-admin.js
 
 ## Real-time Events (WebSockets)
 
-WebSocket endpoints are managed by Socket.io and trigger instant notifications:
-- `auth:join` — Join a room matching the user's role (e.g. `Admin`, `Volunteer`).
-- `disaster:new` — Emits when a new report is created to notify admins/volunteers.
-- `request:new` — Emits when aid requests are created.
-- `broadcast:alert` — Admin alert pushed instantly to all active volunteer screens.
+WebSocket connections are managed by Socket.io and trigger instant, bidirectional updates:
+* `auth:join` — Join a room matching the user's role (e.g. `Admin`, `Volunteer`).
+* `disaster:new` — Emits when a new report is created to notify admins/volunteers.
+* `request:new` — Emits when aid requests are created.
+* `broadcast:alert` — Admin alert pushed instantly to all active volunteer screens.
