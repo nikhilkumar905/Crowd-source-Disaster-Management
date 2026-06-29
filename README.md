@@ -133,7 +133,7 @@ Follow these step-by-step instructions to run the project locally on your Window
    ```env
    PORT=5001
    MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<dbname>
-   JWT_SECRET=f4132f70e7dfb967a58b8ef9e8f387be84774f9d86826b6caae70d07d2e9380f866335836c0e1fdf704b8bd18ccf92b9a12a7cb2cb783a70c421ac371e336a84
+   JWT_SECRET=your_super_secret_jwt_key_here
    JWT_EXPIRES_IN=7d
    CLIENT_URL=http://localhost:5173
    ```
